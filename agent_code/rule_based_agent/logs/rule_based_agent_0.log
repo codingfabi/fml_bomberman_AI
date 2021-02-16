@@ -1,0 +1,3 @@
+2021-02-16 08:46:53,231 [rule_based_agent_0_wrapper] DEBUG: Calling setup on callback.
+2021-02-16 08:46:53,232 [rule_based_agent_0_code] DEBUG: Successfully entered setup code
+2021-02-16 08:46:53,232 [rule_based_agent_0_wrapper] DEBUG: Got result from callback#setup in 0.000s.
