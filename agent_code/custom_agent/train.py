@@ -4,7 +4,10 @@ from collections import namedtuple, deque
 from typing import List
 
 import events as e
-from .callbacks import state_to_features
+
+from .custom_model import CustomModel
+
+from .helper import state_to_features
 
 # This is only an example!
 Transition = namedtuple('Transition',
@@ -13,16 +16,44 @@ Transition = namedtuple('Transition',
 # Hyper parameters -- DO modify
 TRANSITION_HISTORY_SIZE = 3  # keep only ... last transitions
 RECORD_ENEMY_TRANSITIONS = 1.0  # record enemy transitions with probability ...
+LEARNING_RATE = 0.001
 
 # Events
 PLACEHOLDER_EVENT = "PLACEHOLDER"
 
+# define the rewards for each game event
+game_rewards = {
+    e.COIN_COLLECTED: 10,
+    e.KILLED_OPPONENT: 50,
+    e.MOVED_LEFT: -1,
+    e.MOVED_RIGHT: -1,
+    e.MOVED_UP: -1,
+    e.MOVED_DOWN: -1,
+    e.WAITED: -0.1,
+    e.INVALID_ACTION: -10,
+    e.BOMB_DROPPED: 0.1,
+    e.BOMB_EXPLODED: 0,
+    e.CRATE_DESTROYED: 1,
+    e.COIN_FOUND: 1,
+    e.KILLED_SELF: -10,
+    e.GOT_KILLED: -50,
+    e.OPPONENT_ELIMINATED: 5,
+    e.SURVIVED_ROUND: 5
+    }
 
-def setup_training(self):
+
+def setup_training(self, epsilon):
     """
-    Initialise self for training purpose.
+    Initialize self for training purpose.
     This is called from 'setup' in callbacks.py
     """
+    print('this thing was called')
+    self.n_games = 0
+    self.epsilon = epsilon
+    self.gamma = 0.8
+    # TODO: model
+    self.model = CustomModel()
+    
 
 
 def events_occured(self, old_game_state: dict, selft_action: str, new_game_state: dict, events: List[str]):
@@ -31,7 +62,7 @@ def events_occured(self, old_game_state: dict, selft_action: str, new_game_state
     :param self: standard object that is passed to all methods
     :param old_game_state: The state that was passed to the last call of `act`
     :param self_action: The action taken by the agent
-    :param new_game_state: The state the agnet is in now
+    :param new_game_state: The state the agent is in now
     :param events: Diff between old and new game_state
     """
 
@@ -44,7 +75,7 @@ def events_occured(self, old_game_state: dict, selft_action: str, new_game_state
 
 def end_of_round(self, laste_game_state: dict, last_action: str, events: List[str]):
     """
-    Called at the end of each game or when the agend died to hand out final rewards
+    Called at the end of each game or when the agent died to hand out final rewards
     """
 
     self.logger.debug(f'Encountered event(s) {", ".join(map(repr, events))} in final step')
@@ -76,26 +107,6 @@ def reward_from_events(self, events: List[str]) -> int:
         e.OPPONENT_ELIMINATED
         e.SURVIVED_ROUND
     """
-
-    # define the rewards for each game event
-    game_rewards = {
-        e.COIN_COLLECTED: 10,
-        e.KILLED_OPPONENT: 50,
-        e.MOVED_LEFT: -1,
-        e.MOVED_RIGHT: -1,
-        e.MOVED_UP: -1,
-        e.MOVED_DOWN: -1,
-        e.WAITED: -0.1,
-        e.INVALID_ACTION: -10,
-        e.BOMB_DROPPED: 0.1
-        e.BOMB_EXPLODED: 0,
-        e.CRATE_DESTROYED: 1,
-        e.COIN_FOUND: 1,
-        e.KILLED_SELF: -10,
-        e.GOT_KILLED: -50,
-        e.OPPONENT_ELIMINATED: 5,
-        e.SURVIVED_ROUND: 5
-    }
     reward_sum = 0
     for event in events:
         if event in game_rewards:
