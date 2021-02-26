@@ -10,7 +10,7 @@ def setup(self):
     """
     if self.train or not os.path.isfile("my-saved-model.pt"):
         self.logger.info("Setting up new model")
-        weights = np.random.rand(len(ACTIONS))
+        weights = np.random.rand(len(actions))
         self.model = weights / weights.sum()
     else:
         self.logger.info("Loading saved model")
@@ -21,6 +21,7 @@ def setup(self):
 
 def act(self, game_state: dict):
 
+    self.model = [0.2,0.2,0.2,0.2,0.1,0.1]
 
     random_prob = 0.1
     if self.train and random.random() < random_prob:
@@ -30,7 +31,7 @@ def act(self, game_state: dict):
         return action
     
     self.logger.debug("Querying model for action")
-    model_action = np.random.choice(Aactions, p=self.model)
+    model_action = np.random.choice(actions, p=self.model)
     self.logger.debug("Model returnd action: ", model_action)
     return model_action
 
