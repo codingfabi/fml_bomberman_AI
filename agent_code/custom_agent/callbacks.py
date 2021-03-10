@@ -1,6 +1,7 @@
 import numpy as np
 import pickle
 import os
+import random
 
 from .helper import state_to_features
 from .train import setup_training
@@ -13,7 +14,6 @@ def setup(self):
     """
     if self.train or not os.path.isfile("my-saved-model.pt"):
         self.logger.info("Setting up new model")
-        setup_training(self, epsilon=0.8)
     else:
         self.logger.info("Loading saved model")
         """ with open("my-saved-model.pt", "rb") as file:
@@ -22,7 +22,7 @@ def setup(self):
 
 
 def act(self, game_state: dict):
-
+    
     random_prob = 0.1
     if self.train and random.random() < random_prob:
         self.logger.debug("Choosing action purely at random.")

@@ -42,21 +42,20 @@ game_rewards = {
     }
 
 
-def setup_training(self, epsilon):
+def setup_training(self):
     """
     Initialize self for training purpose.
     This is called from 'setup' in callbacks.py
     """
-    print('this thing was called')
     self.n_games = 0
-    self.epsilon = epsilon
+    self.epsilon = 0
     self.gamma = 0.8
-    # TODO: model
     self.model = CustomModel()
+    self.transitions = []
     
 
 
-def events_occured(self, old_game_state: dict, selft_action: str, new_game_state: dict, events: List[str]):
+def game_events_occurred(self, old_game_state: dict, self_action: str, new_game_state: dict, events: List[str]):
     """
     Called once per step to allow intermediate rewards based on game events.
     :param self: standard object that is passed to all methods
@@ -68,9 +67,17 @@ def events_occured(self, old_game_state: dict, selft_action: str, new_game_state
 
     self.logger.debug(f'Encountered game event(s) {", ".join(map(repr, events))} in step {new_game_state["step"]}')
 
+    print('events occured was called')
+    print(reward_from_events(self, events))
+
+    current_transition = Transition(state_to_features(old_game_state), self_action, state_to_features(new_game_state), reward_from_events(self, events))
     # here we could add some events to add rewards
 
-    self.transitions.append(Transition(state_to_features(old_game_state), self_action, state_to_features(new_game_state), reward_from_events(self, events)))
+    self.transitions.append(current_transition)
+    f = open("demo.txt", "a")
+    if current_transition.action != None:
+        f.write(current_transition.action)
+    f.close()
 
 
 def end_of_round(self, laste_game_state: dict, last_action: str, events: List[str]):
@@ -79,6 +86,7 @@ def end_of_round(self, laste_game_state: dict, last_action: str, events: List[st
     """
 
     self.logger.debug(f'Encountered event(s) {", ".join(map(repr, events))} in final step')
+
     self.transitions.append(Transition(state_to_features(laste_game_state), last_action, None, reward_from_events(self, events)))
 
     # store the model

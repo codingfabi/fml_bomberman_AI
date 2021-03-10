@@ -20,7 +20,10 @@ def state_to_features(game_state: dict) -> np.array:
 
     # For example, you could construct several channels of equal shape, ...
     channels = []
-    channels.append(...)
+    channels.append(game_state['round'])
+    channels.append(game_state['step'])
+    channels.append(game_state['self'])
+    channels.append(game_state['coins'])
     # concatenate them as a feature tensor (they must have the same shape), ...
     stacked_channels = np.stack(channels)
     # and return them as a vector
