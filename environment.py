@@ -33,6 +33,8 @@ class GenericWorld:
     running: bool = False
     step: int
 
+    args: WorldArgs
+
     agents: List[Agent]
     active_agents: List[Agent]
     arena: np.ndarray
@@ -44,8 +46,8 @@ class GenericWorld:
     round_id: str
 
     def __init__(self, args: WorldArgs):
-        self.setup_logging()
         self.args = args
+        self.setup_logging()
         if self.args.no_gui:
             self.gui = None
         else:
