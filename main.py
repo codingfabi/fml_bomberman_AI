@@ -1,3 +1,4 @@
+import os
 import sys
 import threading
 from argparse import ArgumentParser
@@ -5,7 +6,7 @@ from time import sleep, time
 
 import settings as s
 from environment import BombeRLeWorld, GenericWorld
-from fallbacks import pygame, tqdm
+from fallbacks import pygame, tqdm, LOADED_PYGAME
 from replay import ReplayWorld
 
 
@@ -26,7 +27,7 @@ def game_logic(world: GenericWorld, user_inputs, args):
             world.do_step(user_inputs.pop(0) if len(user_inputs) else 'WAIT')
 
 
-def main(args):
+def main(argv = None):
     parser = ArgumentParser()
 
     subparsers = parser.add_subparsers(dest='command_name', required=True)
@@ -43,6 +44,7 @@ def main(args):
 
     play_parser.add_argument("--n-rounds", type=int, default=10, help="How many rounds to play")
     play_parser.add_argument("--save-replay", default=False, action="store_true", help="Store the game as .pt for a replay")
+    parser.add_argument('--save-replay', const=True, default=False, action='store', nargs='?', help='Store the game as .pt for a replay')
     play_parser.add_argument("--no-gui", default=False, action="store_true", help="Deactivate the user interface and play as fast as possible.")
 
     # Replay arguments
@@ -56,18 +58,21 @@ def main(args):
                          help="Wait for key press until next movement")
         sub.add_argument("--update-interval", type=float, default=0.1,
                          help="How often agents take steps (ignored without GUI)")
+        sub.add_argument("--log_dir", type=str, default=os.path.dirname(__file__) + "/logs")
 
         # Video?
         sub.add_argument("--make-video", default=False, action="store_true",
                          help="Make a video from the game")
 
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     if args.command_name == "replay":
         args.no_gui = False
         args.n_rounds = 1
 
     has_gui = not args.no_gui
     if has_gui:
+        if not LOADED_PYGAME:
+            raise ValueError("pygame could not loaded, cannot run with GUI")
         pygame.init()
 
     # Initialize environment and agents
@@ -154,4 +159,4 @@ def main(args):
 
 
 if __name__ == '__main__':
-    main(sys.argv)
+    main()

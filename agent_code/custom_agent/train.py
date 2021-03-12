@@ -7,11 +7,9 @@ from typing import List
 import events as e
 
 from .custom_model import CustomModel
-from .cstom_model import update_qtable
 
 from .helper import state_to_features
 
-from .callbacks import actions
 
 # This is only an example!
 Transition = namedtuple('Transition',
@@ -83,14 +81,15 @@ def game_events_occurred(self, old_game_state: dict, self_action: str, new_game_
     """
 
     self.logger.debug(f'Encountered game event(s) {", ".join(map(repr, events))} in step {new_game_state["step"]}')
-
-    print('events occured was called')
-    print(reward_from_events(self, events))
+    self.logger.debug(f'The total reward for the events was', reward_from_events(self, events))
 
     """ current_transition = Transition(state_to_features(old_game_state), self_action, state_to_features(new_game_state), reward_from_events(self, events)) """
     # here we could add some events to add rewards
-    rewardsum = reward_from_events(events)
-    self.model.update_qtable(self, action_taken=self_action, old_state = old_game_state, next_state = new_game_state, total_reward  = reward_sum)
+    rewardsum = reward_from_events(self, events)
+    
+    print(rewardsum)
+
+    self.model.update_qtable(old_game_state,new_game_state,self_action,rewardsum)
 
     """ self.transitions.append(current_transition)
     f = open("demo.txt", "a")
@@ -106,7 +105,12 @@ def end_of_round(self, laste_game_state: dict, last_action: str, events: List[st
 
     self.logger.debug(f'Encountered event(s) {", ".join(map(repr, events))} in final step')
 
-    self.transitions.append(Transition(state_to_features(laste_game_state), last_action, None, reward_from_events(self, events)))
+    rewards = reward_from_events(self, events)
+
+    print(rewards)
+
+    print('Your score for the game was: ')
+    print(laste_game_state['self'][1])
 
     # store the model
     with open("my-saved-model.pt", "wb") as file:

@@ -1,4 +1,5 @@
 import numpy as np
+from typing import List
 
 def state_to_features(game_state: dict) -> np.array:
     """
@@ -29,7 +30,7 @@ def state_to_features(game_state: dict) -> np.array:
     # and return them as a vector
     return stacked_channels.reshape(-1)
 
-def action_to_numeric(actions: List[str] action):
+def action_to_numeric(actions: List[str], action):
     """
     this function maps an array string to a numeric list of actions 
     lets see if we need this

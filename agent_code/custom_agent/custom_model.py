@@ -21,24 +21,27 @@ class CustomModel:
     
     def update_qtable(self, old_state, next_state, action_taken, total_reward):
         newTable = np.load("custom_model.npy")
-        actionIndex = self.actions.index(action_taken)
-        old_state = state_to_features(old_state)
-        next_state = state_to_features(new_state)
+        actionIndex = np.where(self.actions == action_taken)
+        old_state_features = state_to_features(old_state)
+        next_state_features = state_to_features(next_state)
 
         if old_state in newTable:
-            old_reward = q_table[old_state, actionIndex]
+            old_reward = q_table[old_state_features, actionIndex]
 
-            if new_state in newTable:
-                max_value_of_next_state = np.max(newTable[next_state])
+            if next_state_features in newTable:
+                max_value_of_next_state = np.max(newTable[next_state_features])
             else:
                 max_value_of_next_state = 0
 
             # this is the essential q_learning function
             new_value = (1 - self.alpha)* old_reward + self.alpha * (total_reward + self.gamma * max_value_of_next_state)
-            newTable[old_state, actionIndex] = new_value
+            newTable[old_state_features, actionIndex] = new_value
 
             np.save("custom_model.npy", newTable)
         else:
             newRowValues = np.array([actions.len])
             newRowValues[actionIndex]=rewards
             newTable = np.append(newTable, [old_state, newRowValues])
+        
+
+    
