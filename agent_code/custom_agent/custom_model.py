@@ -6,6 +6,8 @@ class CustomModel:
 
     def __init__(self):
         self.actions = np.array(['UP','DOWN','LEFT','RIGHT','BOMB','WAIT'])
+        self.gamma = 0.8
+        self.alpha = 0.1
         np.save("custom_model.npy", np.array([1,len(self.actions)])) 
 
     def predict_action(self, game_state):
@@ -31,6 +33,7 @@ class CustomModel:
             else:
                 max_value_of_next_state = 0
 
+            # this is the essential q_learning function
             new_value = (1 - self.alpha)* old_reward + self.alpha * (total_reward + self.gamma * max_value_of_next_state)
             newTable[old_state, actionIndex] = new_value
 

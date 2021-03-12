@@ -53,8 +53,6 @@ def setup_training(self):
     """
     self.n_games = 0
     self.epsilon = 0.3
-    self.gamma = 0.8
-    self.alpha = 0.1
     self.model = CustomModel()
     self.transitions = []
 
