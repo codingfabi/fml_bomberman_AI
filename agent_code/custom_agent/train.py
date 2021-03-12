@@ -65,12 +65,15 @@ def setup_training(self):
 def do_training_step(self, game_state: dict):
     features = state_to_features(game_state)
     if(random.uniform(0, 1) < self.epsilon):
-        action = np.random.choice(actions)
+        action = np.random.choice(self.model.actions)
     else:
-        self.model.predict_action(self, game_state)
+        actionIndex = self.model.predict_action(self, game_state)
+        action = self.model.actions[actionIndex]
+
     return action
+    
 
-
+    
 def game_events_occurred(self, old_game_state: dict, self_action: str, new_game_state: dict, events: List[str]):
     """
     Called once per step to allow intermediate rewards based on game events.
