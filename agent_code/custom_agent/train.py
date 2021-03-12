@@ -1,13 +1,17 @@
 import pickle
 import random
+import numpy as np
 from collections import namedtuple, deque
 from typing import List
 
 import events as e
 
 from .custom_model import CustomModel
+from .cstom_model import update_qtable
 
 from .helper import state_to_features
+
+from .callbacks import actions
 
 # This is only an example!
 Transition = namedtuple('Transition',
@@ -48,11 +52,23 @@ def setup_training(self):
     This is called from 'setup' in callbacks.py
     """
     self.n_games = 0
-    self.epsilon = 0
+    self.epsilon = 0.3
     self.gamma = 0.8
+    self.alpha = 0.1
     self.model = CustomModel()
     self.transitions = []
-    
+
+
+
+    # Initilize Q-Table
+
+def do_training_step(self, game_state: dict):
+    features = state_to_features(game_state)
+    if(random.uniform(0, 1) < self.epsilon):
+        action = np.random.choice(actions)
+    else:
+        self.model.predict_action(self, game_state)
+    return action
 
 
 def game_events_occurred(self, old_game_state: dict, self_action: str, new_game_state: dict, events: List[str]):
@@ -70,14 +86,16 @@ def game_events_occurred(self, old_game_state: dict, self_action: str, new_game_
     print('events occured was called')
     print(reward_from_events(self, events))
 
-    current_transition = Transition(state_to_features(old_game_state), self_action, state_to_features(new_game_state), reward_from_events(self, events))
+    """ current_transition = Transition(state_to_features(old_game_state), self_action, state_to_features(new_game_state), reward_from_events(self, events)) """
     # here we could add some events to add rewards
+    rewardsum = reward_from_events(events)
+    self.model.update_qtable(self, action_taken=self_action, old_state = old_game_state, next_state = new_game_state, total_reward  = reward_sum)
 
-    self.transitions.append(current_transition)
+    """ self.transitions.append(current_transition)
     f = open("demo.txt", "a")
     if current_transition.action != None:
         f.write(current_transition.action)
-    f.close()
+    f.close() """
 
 
 def end_of_round(self, laste_game_state: dict, last_action: str, events: List[str]):

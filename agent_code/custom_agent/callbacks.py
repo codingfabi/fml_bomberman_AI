@@ -4,7 +4,7 @@ import os
 import random
 
 from .helper import state_to_features
-from .train import setup_training
+from .train import setup_training, do_training_step
 
 actions = np.array(['UP','DOWN','LEFT','RIGHT','BOMB','WAIT']) 
 
@@ -23,11 +23,8 @@ def setup(self):
 
 def act(self, game_state: dict):
     
-    random_prob = 0.1
-    if self.train and random.random() < random_prob:
-        self.logger.debug("Choosing action purely at random.")
-        action = np.random.choice(actions, p=[0.2,0.2,0.2,0.2,0.1,0.1])
-        self.logger.info('picked this action: ', action)
+    if self.train:
+        action = do_training_step(self, game_state)
         return action
     
     self.logger.debug("Querying model for action")
