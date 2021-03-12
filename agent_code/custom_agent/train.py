@@ -50,7 +50,7 @@ def setup_training(self):
     This is called from 'setup' in callbacks.py
     """
     self.n_games = 0
-    self.epsilon = 0.3
+    self.epsilon = 2
     self.model = CustomModel()
     self.transitions = []
 
@@ -63,7 +63,7 @@ def do_training_step(self, game_state: dict):
     if(random.uniform(0, 1) < self.epsilon):
         action = np.random.choice(self.model.actions)
     else:
-        actionIndex = self.model.predict_action(self, game_state)
+        actionIndex = self.model.predict_action(game_state)
         action = self.model.actions[actionIndex]
 
     return action
@@ -87,7 +87,6 @@ def game_events_occurred(self, old_game_state: dict, self_action: str, new_game_
     # here we could add some events to add rewards
     rewardsum = reward_from_events(self, events)
     
-    print(rewardsum)
 
     self.model.update_qtable(old_game_state,new_game_state,self_action,rewardsum)
 
@@ -107,7 +106,6 @@ def end_of_round(self, laste_game_state: dict, last_action: str, events: List[st
 
     rewards = reward_from_events(self, events)
 
-    print(rewards)
 
     print('Your score for the game was: ')
     print(laste_game_state['self'][1])

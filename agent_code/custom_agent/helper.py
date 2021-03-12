@@ -35,7 +35,6 @@ def state_to_features(game_state: dict) -> np.array:
     channels.append(ownPosition)
     channels.append(firstCoin)
 
-    print(channels)
     # concatenate them as a feature tensor (they must have the same shape), ...
     stacked_channels = np.stack(channels)
     # and return them as a vector

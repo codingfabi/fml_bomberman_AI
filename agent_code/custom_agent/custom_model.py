@@ -8,12 +8,15 @@ class CustomModel:
         self.actions = np.array(['UP','DOWN','LEFT','RIGHT','BOMB','WAIT'])
         self.gamma = 0.8
         self.alpha = 0.1
-        np.save("custom_model.npy", np.array([1,len(self.actions)])) 
+        np.save("custom_model.npy", np.empty((1,len(self.actions)+1)))
+        test = np.load("custom_model.npy")
+        print(test)
 
     def predict_action(self, game_state):
         features = state_to_features(game_state)
-        qtable = np.load("custom_model.npy")
-        action = np.argmax(q_table[state])
+        q_table = np.load("custom_model.npy")
+        state_index = np.where(q_table)
+        action = np.argmax(q_table[:,0] == features)
         """ weights = np.random.rand(len(self.actions))
         weights = weights / weights.sum()
         action = np.random.choice(self.actions, p = weights) """
@@ -25,11 +28,13 @@ class CustomModel:
         old_state_features = state_to_features(old_state)
         next_state_features = state_to_features(next_state)
 
-        if old_state in newTable:
-            old_reward = q_table[old_state_features, actionIndex]
+        oldRewardIndex = self.getIndexOfStateInQTable(newTable, old_state_features)
+
+        if oldRewardIndex[0] > -1:
+            old_reward = q_table[oldRewardIndex, actionIndex]
 
             if next_state_features in newTable:
-                max_value_of_next_state = np.max(newTable[next_state_features])
+                max_value_of_next_state = np.max(newTable[next_state_features, :])
             else:
                 max_value_of_next_state = 0
 
@@ -39,9 +44,11 @@ class CustomModel:
 
             np.save("custom_model.npy", newTable)
         else:
-            newRowValues = np.array([actions.len])
-            newRowValues[actionIndex]=rewards
+            newRowValues = np.zeros([len(self.actions)])
+            newRowValues[actionIndex] = total_reward
             newTable = np.append(newTable, [old_state, newRowValues])
         
 
+    def getIndexOfStateInQTable(self, qtable, features):
+        return np.where(qtable[:, 0] == features)
     
