@@ -1,11 +1,8 @@
 import numpy as np
-
+import pickle
 """
 this is just a file to check on the qTable
 """
 
-qtable = np.load('custom_model_qvalues.npy', allow_pickle=True)
+qtable = pickle.load(open("custom_model.pt","rb"))
 print(qtable)
-
-statesTable = np.load('custom_model_states.npy', allow_pickle=True)
-print(statesTable)
