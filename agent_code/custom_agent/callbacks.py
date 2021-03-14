@@ -6,6 +6,8 @@ import random
 from .helper import state_to_features
 from .train import setup_training, do_training_step
 
+from .custom_model import CustomModel
+
 actions = np.array(['UP','DOWN','LEFT','RIGHT','BOMB','WAIT']) 
 
 def setup(self):
@@ -16,8 +18,7 @@ def setup(self):
         self.logger.info("Setting up new model")
     else:
         self.logger.info("Loading saved model")
-        """ with open("my-saved-model.pt", "rb") as file:
-            self.model = pickle.load(file) """
+        self.model = CustomModel()
 
 
 
@@ -28,6 +29,7 @@ def act(self, game_state: dict):
         return action
     
     self.logger.debug("Querying model for action")
-    model_action = self.model.predict_action(game_state)
+    action_index = self.model.predict_action(game_state)
+    model_action = self.model.actions[action_index]
     self.logger.debug("Model returnd action: ", model_action)
     return model_action
