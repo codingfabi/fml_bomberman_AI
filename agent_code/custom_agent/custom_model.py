@@ -41,8 +41,11 @@ class CustomModel:
         features = state_to_features(game_state)
         qTable = pickle.load(open(self.qDictFileName, "rb"))
         
-        rewards = qTable[state_to_features(game_state)]
-        action = np.argmax(rewards)
+        if features in qTable:
+            rewards = qTable[features]
+            action = np.argmax(rewards)
+        else:
+            action = np.random.choice(len(self.actions)-1)
         """ weights = np.random.rand(len(self.actions))
         weights = weights / weights.sum()
         action = np.random.choice(self.actions, p = weights) """

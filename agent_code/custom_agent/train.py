@@ -31,7 +31,7 @@ game_rewards = {
     e.MOVED_RIGHT: -1,
     e.MOVED_UP: -1,
     e.MOVED_DOWN: -1,
-    e.WAITED: -0.1,
+    e.WAITED: -1,
     e.INVALID_ACTION: -10,
     e.BOMB_DROPPED: 0.1,
     e.BOMB_EXPLODED: 0,
@@ -52,7 +52,7 @@ def setup_training(self):
 
     print('setup training was called')
     self.n_games = 0
-    self.epsilon = 2
+    self.epsilon = -1 
     self.model = CustomModel()
     self.transitions = []
 
@@ -67,6 +67,8 @@ def do_training_step(self, game_state: dict):
     else:
         actionIndex = self.model.predict_action(game_state)
         action = self.model.actions[actionIndex]
+
+    print('predicted action: ' + action)
 
     return action
     
