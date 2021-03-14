@@ -19,21 +19,26 @@ def state_to_features(game_state: dict) -> np.array:
     if game_state is None:
         return None
 
+    channels = []
+
     # store features in variable
     round = game_state['round']
     step = game_state['step']
     ownPosition = game_state['self'][3]
-    if len(game_state['coins']) > 0:
+    channels.append(ownPosition)
+    """ if len(game_state['coins']) > 0:
         firstCoin = game_state['coins'][0]
     else:
-        firstCoin = (0,0)
+        firstCoin = (0,0) """
 
+    for coin in game_state['coins']:
+        channels.append(coin)
 
 
     # For example, you could construct several channels of equal shape, ...
-    channels = []
-    channels.append(ownPosition)
-    channels.append(firstCoin)
+    #channels = []
+    #channels.append(ownPosition)
+    # channels.append(firstCoin)
 
     # concatenate them as a feature tensor (they must have the same shape), ...
     stacked_channels = np.stack(channels)
