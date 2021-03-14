@@ -49,6 +49,8 @@ def setup_training(self):
     Initialize self for training purpose.
     This is called from 'setup' in callbacks.py
     """
+
+    print('setup training was called')
     self.n_games = 0
     self.epsilon = 2
     self.model = CustomModel()
@@ -80,13 +82,12 @@ def game_events_occurred(self, old_game_state: dict, self_action: str, new_game_
     :param events: Diff between old and new game_state
     """
 
-    self.logger.debug(f'Encountered game event(s) {", ".join(map(repr, events))} in step {new_game_state["step"]}')
-    self.logger.debug(f'The total reward for the events was', reward_from_events(self, events))
+    """    self.logger.debug(f'Encountered game event(s) {", ".join(map(repr, events))} in step {new_game_state["step"]}')
+    self.logger.debug(f'The total reward for the events was', reward_from_events(self, events)) """
 
     """ current_transition = Transition(state_to_features(old_game_state), self_action, state_to_features(new_game_state), reward_from_events(self, events)) """
     # here we could add some events to add rewards
     rewardsum = reward_from_events(self, events)
-    
 
     self.model.update_qtable(old_game_state,new_game_state,self_action,rewardsum)
 
@@ -101,8 +102,8 @@ def end_of_round(self, laste_game_state: dict, last_action: str, events: List[st
     """
     Called at the end of each game or when the agent died to hand out final rewards
     """
-
-    self.logger.debug(f'Encountered event(s) {", ".join(map(repr, events))} in final step')
+    
+    """self.logger.debug(f'Encountered event(s) {", ".join(map(repr, events))} in final step')"""
 
     rewards = reward_from_events(self, events)
 
