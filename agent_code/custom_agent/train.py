@@ -10,6 +10,7 @@ from .custom_model import CustomModel
 
 from .helper import state_to_features
 from .helper import getGameNumberFromState
+from .helper import getStepsFromState
 
 
 # This is only an example!
@@ -38,8 +39,8 @@ game_rewards = {
     e.BOMB_EXPLODED: 0,
     e.CRATE_DESTROYED: 10,
     e.COIN_FOUND: 20,
-    e.KILLED_SELF: -40,
-    e.GOT_KILLED: -50,
+    e.KILLED_SELF: -5,
+    e.GOT_KILLED: -10,
     e.OPPONENT_ELIMINATED: 5,
     e.SURVIVED_ROUND: 0
     }
@@ -53,7 +54,7 @@ def setup_training(self):
 
     print('setup training was called')
     self.n_games = 0
-    self.epsilon = 0.8
+    self.epsilon = 1
     self.model = CustomModel()
     self.transitions = []
 
@@ -71,7 +72,7 @@ def do_training_step(self, game_state: dict):
 
     #self.logger.debug(f'Action taken:', action)
 
-    reduce_epsilon(self, getGameNumberFromState(game_state))
+    reduce_epsilon(self, getGameNumberFromState(game_state),getStepsFromState(game_state))
 
     return action
     
@@ -146,18 +147,22 @@ def reward_from_events(self, events: List[str]) -> int:
     self.logger.info(f"Awarded {reward_sum} for events {', '.join(events)}")
     return reward_sum
 
-def reduce_epsilon(self, gamesPlayed: int):
-    if gamesPlayed > 100:
-        self.epsilon = 0.6
+def reduce_epsilon(self, gamesPlayed: int, steps: int):
     
-    if gamesPlayed > 150:
-        self.epsilon = 0.5
-
-    if gamesPlayed > 200:
-        self.epsilon = 0.4
-
-    if gamesPlayed > 250:
-        self.epsilon = 0.2
-
-    if gamesPlayed > 400:
-        self.epsion = 0.1
+    if gamesPlayed > 50 and steps < 10:
+        self.epsilon = 0.02
+    else:
+        if gamesPlayed > 25:
+            self.epsilon = 0.8
+        if gamesPlayed > 50:
+            self.epsion = 0.7
+        if gamesPlayed > 100:
+            self.epsilon = 0.6    
+        if gamesPlayed > 150:
+            self.epsilon = 0.5
+        if gamesPlayed > 200:
+            self.epsilon = 0.1
+        if gamesPlayed > 250:
+            self.epsilon = 0.2
+        if gamesPlayed > 350:
+            self.epsion = 0.1

@@ -29,6 +29,9 @@ def state_to_features(game_state: dict) -> np.array:
     field = game_state['field']
     for coin in game_state['coins']:
         field[coin] = 2
+    for bomb in game_state['bombs']:
+        bomb_coordinates = bomb[0]
+        field[bomb_coordinates] = 3
     surrounding = getSurroundingFields(field, ownPosition)
     for point in surrounding:
         channels.append(point)
@@ -62,6 +65,9 @@ def action_to_numeric(actions: List[str], action):
 
 def getGameNumberFromState(game_state: dict):
     return game_state['round']
+
+def getStepsFromState(game_state:dict):
+    return game_state['step']
 
 def getSurroundingFields(field, position):
     myX = position[0]
