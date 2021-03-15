@@ -8,29 +8,16 @@ class CustomModel:
 
     modelDict = {(0,0,0,0):[0,0,0,0,0,0]}
     qDictFileName = str
-    qTableFileName: str 
-    stateTableFileName: str
     gamma: int
     alpha: int 
 
     def __init__(self):
         print('new modell created')
-        self.actions = np.array(['UP','DOWN','LEFT','RIGHT','BOMB','WAIT'])
+        self.actions = np.array(['UP','DOWN','LEFT','RIGHT','BOMB'])
         self.gamma = 0.8
-        self.alpha = 0.1
+        self.alpha = 0.5
 
         self.qDictFileName = "custom_model.pt"
-        self.stateTableFileName = "custom_model_states.npy"
-        self.qTableFileName = "custom_model_qvalues.npy"
-
-        if not os.path.isfile(self.stateTableFileName):
-            print('create new states table')
-            np.save(self.stateTableFileName, np.empty((1,4)))
-
-        
-        if not os.path.isfile(self.qTableFileName):
-            print('create new qtable')
-            np.save(self.qTableFileName, np.empty((1,len(self.actions))))
 
         if not os.path.isfile(self.qDictFileName):
             print('created new dict file')
@@ -46,6 +33,7 @@ class CustomModel:
             action = np.argmax(rewards)
         else:
             action = np.random.choice(len(self.actions)-1)
+            print('predicted random action')
         """ weights = np.random.rand(len(self.actions))
         weights = weights / weights.sum()
         action = np.random.choice(self.actions, p = weights) """
@@ -99,4 +87,27 @@ class CustomModel:
             currentQTable.update({old_state_features: newRow})
         
         pickle.dump(currentQTable, open(self.qDictFileName,"wb"))
+
+
+    def update_qtable_after_game_ends(self, old_game_state, action_taken, total_reward):
+        currentQTable = pickle.load(open(self.qDictFileName, "rb" ))
+
+        actionIndex = np.where(self.actions == action_taken)[0]        
+        old_state_features = state_to_features(old_game_state)
+        if type(old_state_features) is not tuple:
+            print('quitted q table update because old state was shit')
+            return None
+
+        if old_state_features in currentQTable:
+            old_state_rewards = currentQTable[old_state_features]
+            old_reward = old_state_rewards[actionIndex]
+
+            new_value = (1-self.alpha)*old_reward + self.alpha * total_reward
+            currentQTable[old_state_features][actionIndex] = new_value
         
+        else:
+            newRow = np.zeros([len(self.actions)])
+            newRow[actionIndex] = total_reward
+            currentQTable.update({old_state_features: newRow})
+        
+        pickle.dump(currentQTable, open(self.qDictFileName,"wb"))

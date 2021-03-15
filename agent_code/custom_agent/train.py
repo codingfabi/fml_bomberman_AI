@@ -9,6 +9,7 @@ import events as e
 from .custom_model import CustomModel
 
 from .helper import state_to_features
+from .helper import getGameNumberFromState
 
 
 # This is only an example!
@@ -25,22 +26,22 @@ PLACEHOLDER_EVENT = "PLACEHOLDER"
 
 # define the rewards for each game event
 game_rewards = {
-    e.COIN_COLLECTED: 10,
-    e.KILLED_OPPONENT: 50,
+    e.COIN_COLLECTED: 40,
+    e.KILLED_OPPONENT: 100,
     e.MOVED_LEFT: -1,
     e.MOVED_RIGHT: -1,
     e.MOVED_UP: -1,
     e.MOVED_DOWN: -1,
-    e.WAITED: -1,
-    e.INVALID_ACTION: -10,
-    e.BOMB_DROPPED: 0.1,
+    e.WAITED: -10,
+    e.INVALID_ACTION: -50,
+    e.BOMB_DROPPED: 1,
     e.BOMB_EXPLODED: 0,
-    e.CRATE_DESTROYED: 1,
-    e.COIN_FOUND: 1,
-    e.KILLED_SELF: -10,
+    e.CRATE_DESTROYED: 10,
+    e.COIN_FOUND: 20,
+    e.KILLED_SELF: -40,
     e.GOT_KILLED: -50,
     e.OPPONENT_ELIMINATED: 5,
-    e.SURVIVED_ROUND: 5
+    e.SURVIVED_ROUND: 0
     }
 
 
@@ -52,7 +53,7 @@ def setup_training(self):
 
     print('setup training was called')
     self.n_games = 0
-    self.epsilon = -1 
+    self.epsilon = 0.8
     self.model = CustomModel()
     self.transitions = []
 
@@ -68,7 +69,9 @@ def do_training_step(self, game_state: dict):
         actionIndex = self.model.predict_action(game_state)
         action = self.model.actions[actionIndex]
 
-    print('predicted action: ' + action)
+    #self.logger.debug(f'Action taken:', action)
+
+    reduce_epsilon(self, getGameNumberFromState(game_state))
 
     return action
     
@@ -109,13 +112,10 @@ def end_of_round(self, laste_game_state: dict, last_action: str, events: List[st
 
     rewards = reward_from_events(self, events)
 
+    self.model.update_qtable_after_game_ends(laste_game_state, last_action, rewards)
 
     print('Your score for the game was: ')
     print(laste_game_state['self'][1])
-
-    # store the model
-    with open("my-saved-model.pt", "wb") as file:
-        pickle.dump(self.model, file)
 
 
 def reward_from_events(self, events: List[str]) -> int:
@@ -145,3 +145,19 @@ def reward_from_events(self, events: List[str]) -> int:
             reward_sum += game_rewards[event]
     self.logger.info(f"Awarded {reward_sum} for events {', '.join(events)}")
     return reward_sum
+
+def reduce_epsilon(self, gamesPlayed: int):
+    if gamesPlayed > 50:
+        self.epsilon = 0.6
+    
+    if gamesPlayed > 100:
+        self.epsilon = 0.5
+
+    if gamesPlayed > 200:
+        self.epsilon = 0.4
+
+    if gamesPlayed > 400:
+        self.epsilon = 0.2
+
+    if gamesPlayed > 500:
+        self.epsion = 0.1

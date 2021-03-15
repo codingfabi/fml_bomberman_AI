@@ -14,7 +14,7 @@ def setup(self):
     """
     sets up agent code in training or non-training mode
     """
-    if self.train or not os.path.isfile("my-saved-model.pt"):
+    if self.train:
         self.logger.info("Setting up new model")
     else:
         self.logger.info("Loading saved model")
