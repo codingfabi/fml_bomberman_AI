@@ -27,6 +27,8 @@ def state_to_features(game_state: dict) -> np.array:
     channels.append(ownPosition[1])
     # add surrounding fields to channels
     field = game_state['field']
+    for coin in game_state['coins']:
+        field[coin] = 2
     surrounding = getSurroundingFields(field, ownPosition)
     for point in surrounding:
         channels.append(point)
@@ -76,16 +78,3 @@ def getSurroundingFields(field, position):
     surrounding.append(field[myX+1, myY+1])
 
     return surrounding
-
-def addCoinsToSurroundings(surrounding, points,  coins):
-    myX = position[0]
-    myY = position[1]
-
-    mySurroundings = [(myX-1,myY-1),(myX,myY-1),(myX+1,myY-1),(myX-1,myY),(myX+1,myY),(myX-1,myY+1),(myX-1,myY+1),(myX-1,myY+1)]
-
-    """ for coin in coins:
-        if coin in mySurroundings: """
-            
-
-
-

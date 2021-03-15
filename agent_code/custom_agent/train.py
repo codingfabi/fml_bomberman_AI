@@ -147,17 +147,17 @@ def reward_from_events(self, events: List[str]) -> int:
     return reward_sum
 
 def reduce_epsilon(self, gamesPlayed: int):
-    if gamesPlayed > 50:
+    if gamesPlayed > 100:
         self.epsilon = 0.6
     
-    if gamesPlayed > 100:
+    if gamesPlayed > 150:
         self.epsilon = 0.5
 
     if gamesPlayed > 200:
         self.epsilon = 0.4
 
-    if gamesPlayed > 400:
+    if gamesPlayed > 250:
         self.epsilon = 0.2
 
-    if gamesPlayed > 500:
+    if gamesPlayed > 400:
         self.epsion = 0.1
