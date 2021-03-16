@@ -10,6 +10,7 @@ class CustomModel:
     qDictFileName = str
     gamma: int
     alpha: int 
+    lastPositions = [(np.NINF, np.NINF), (np.inf,np.inf)]
 
     def __init__(self):
         print('new modell created')
@@ -39,14 +40,12 @@ class CustomModel:
         action = np.random.choice(self.actions, p = weights) """
         return action
 
+    def updateLastPositions(self, position: tuple):
+        self.lastPositions[0] = self.lastPositions[1]
+        self.lastPositions[1] = position
     
     def stateExistsInTable(self, state, table):
         return next((True for elem in table if np.array_equal(elem, state)), False)
-
-    
-    def getIndexOfStateInStatesTable(self, statesTable, features):
-        return np.where(statesTable == features)[0]
-    
     
     def update_qtable(self, old_state, next_state, action_taken, total_reward):
 
