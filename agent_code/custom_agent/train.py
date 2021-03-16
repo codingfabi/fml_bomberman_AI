@@ -43,7 +43,9 @@ game_rewards = {
     e.GOT_KILLED: -10,
     e.OPPONENT_ELIMINATED: 5,
     e.SURVIVED_ROUND: 0
-    }
+}
+
+gameResults = []
 
 
 def setup_training(self):
@@ -57,6 +59,7 @@ def setup_training(self):
     self.epsilon = 1
     self.model = CustomModel()
     self.transitions = []
+    self.gameResults = []
 
 
 
@@ -115,8 +118,14 @@ def end_of_round(self, laste_game_state: dict, last_action: str, events: List[st
 
     self.model.update_qtable_after_game_ends(laste_game_state, last_action, rewards)
 
+    score = laste_game_state['self'][1]
+    
+    with open("scores.txt", "a") as scores_log:
+        scores_log.write(str(score) + "\t")
+
+
     print('Your score for the game was: ')
-    print(laste_game_state['self'][1])
+    print(score)
 
 
 def reward_from_events(self, events: List[str]) -> int:
