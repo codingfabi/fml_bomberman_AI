@@ -22,7 +22,7 @@ def state_to_features(game_state: dict) -> np.array:
     channels = []
 
     # store features in variable
-    ownPosition = game_state['self'][3]
+    ownPosition = getOwnPosition(game_state)
     channels.append(ownPosition[0])
     channels.append(ownPosition[1])
     # add surrounding fields to channels
@@ -68,6 +68,12 @@ def getGameNumberFromState(game_state: dict):
 
 def getStepsFromState(game_state:dict):
     return game_state['step']
+
+def getOwnPosition(game_state:dict):
+    if game_state is not None:
+        return game_state['self'][3]
+    else:
+        return (0,0)
 
 def getSurroundingFields(field, position):
     myX = position[0]
