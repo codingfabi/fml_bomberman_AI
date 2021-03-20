@@ -2,6 +2,7 @@ import pickle
 import os
 
 from sklearn.linear_model import SGDRegressor
+from sklearn.preprocessing import normalize
 
 from .helper import state_to_features
 from .initialMockState import initialMockState
@@ -18,9 +19,8 @@ class ValueFunctionApproximator():
         """
         self.models = []
         for _ in range(actionSpace):
-            model = SGDRegressor(learning_rate="constant")
+            model = SGDRegressor(loss='huber', alpha=0.00000001, max_iter=10000000)
             # initial modal fit, this is needed to prevent crash in train
-            model.partial_fit([state_to_features(initialMockState)], [0])
             self.models.append(model)
         
         pickle.dump( self, open( "BombyMcBombface.pt", "wb" ) )
@@ -29,13 +29,12 @@ class ValueFunctionApproximator():
         """
         predicts an action according to the current value function
         """
-
-        features = state_to_features(game_state)
+        features = normalize([state_to_features(game_state)])
 
         if action == None:
             predictions = []
             for model in self.models:
-                prediction = model.predict([features])[0]
+                prediction = model.predict(features)[0]
                 predictions.append(prediction)
             return predictions
         else:
@@ -45,6 +44,6 @@ class ValueFunctionApproximator():
         """
         update parameters of given state and action
         """
-        features = state_to_features(game_state)
-        self.models[action].partial_fit([features], [target])
+        features = normalize([state_to_features(game_state)])
+        self.models[action].fit(features, [target])
 

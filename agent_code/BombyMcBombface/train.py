@@ -14,15 +14,16 @@ from .helper import getGameNumberFromState
 from .helper import getStepsFromState
 from .helper import getOwnPosition
 
+from sklearn.utils.validation import check_is_fitted
 # This is only an example!
 Transition = namedtuple('Transition',
                         ('state', 'action', 'next_state', 'reward'))
 
 # Hyper parameters -- DO modify
-TRANSITION_HISTORY_SIZE = 40  # keep only ... last transitions
+TRANSITION_HISTORY_SIZE = 400  # keep only ... last transitions
 RECORD_ENEMY_TRANSITIONS = 1.0  # record enemy transitions with probability ...
 LEARNING_RATE = 0.001
-BATCH_SIZE = 100
+BATCH_SIZE = 50
 
 ACTIONS = ['UP', 'RIGHT', 'DOWN', 'LEFT', 'WAIT', 'BOMB']
 ACTION_SPACE = len(ACTIONS)
@@ -50,7 +51,7 @@ game_rewards = {
     e.GOT_KILLED: -10,
     e.OPPONENT_ELIMINATED: 5,
     e.SURVIVED_ROUND: 0,
-    VISITED_SAME_PLACE: -40
+    VISITED_SAME_PLACE: -5
 }
 
 
@@ -66,6 +67,10 @@ def setup_training(self):
     self.gamma = 0.8
     self.epsilon = 1
 
+    print('setup training was called')
+
+    self.lastBatch = []
+
     # check for setting up of new model or retraining existing model
     if not os.path.isfile('BombyMcBombface.pt'):
         self.approximator = ValueFunctionApproximator(ACTION_SPACE)
@@ -75,15 +80,18 @@ def setup_training(self):
 
 def do_training_step(self, game_state: dict):
     
-    policy_function = create_policy_for_approximator(self, self.approximator, self.epsilon, ACTION_SPACE)
+    #policy_function = create_policy_for_approximator(self, self.approximator, self.epsilon, ACTION_SPACE)
 
-    policy = policy_function(game_state)
-
-    action = np.random.choice(ACTIONS, p=policy)
+    #policy = policy_function(game_state)
+    print(self.epsilon)
+    if(random.uniform(0, 1) < self.epsilon):
+        policy = [0.2,0.2,0.2,0.2,0.1,0.1]
+        action = np.random.choice(ACTIONS, p = policy)
+    else:
+        values = self.approximator.predict(game_state)
+        action = ACTIONS[np.argmax(values)]
 
     reduce_epsilon(self, getGameNumberFromState(game_state), getStepsFromState(game_state))
-
-    print(action)
 
     return action
     
@@ -122,13 +130,25 @@ def end_of_round(self, last_game_state: dict, last_action: str, events: List[str
     
     """self.logger.debug(f'Encountered event(s) {", ".join(map(repr, events))} in final step')"""
 
+    if len(self.transitions) < BATCH_SIZE:
+        return
+
     rewards = reward_from_events(self, events)
 
     episode_reward = rewards
+    batch = random.sample(self.transitions, BATCH_SIZE)
+    if batch == self.lastBatch:
+        print('batch was the same')
+    
+    self.lastBatch = batch
+
+    counter = 0
+
     #policy = create_policy_for_approximator(self.approximator, self.epsilon, ACTION_SPACE )
     
     # update the model (episodic updating)
-    for game_step in self.transitions:
+    for game_step in batch:
+        counter += 1
         state = game_step[0]
         action = game_step[1]
         next_state = game_step[2]
@@ -139,18 +159,30 @@ def end_of_round(self, last_game_state: dict, last_action: str, events: List[str
         # do this because first state is somehow empty
         if state is not None and action is not None:
 
-            print('update triggered')
             actionIndex = ACTIONS.index(action)
+            
+            models_are_fitted = True
+            
+            # check if models are fitted
+            for model in self.approximator.models:
+                if hasattr(model, 'coef_'):
+                    pass
+                else:
+                    print('a model was not fitted')
+                    models_are_fitted = False
 
-            """ action_probabilities = policy(state)
-            action = np.random.choice(np.arange(ACTION_SPACE), p=action_probabilities) """
-            next_q_values = self.approximator.predict(next_state)
+            if models_are_fitted:
+                next_q_values = self.approximator.predict(next_state)
+                temporalDifference_target = episode_reward + self.gamma * np.max(next_q_values)
+            else:
+                temporalDifference_target = 0
 
-            temporalDifference_target = episode_reward + self.gamma * np.max(next_q_values)
+            #print(temporalDifference_target)
 
             # use target to update approximator
             self.approximator.updateEstimatorParameters(state, actionIndex, temporalDifference_target)
 
+    print('transitions used for training: ', counter)
     
     with open("rewards.txt", "a") as rewards_log:
             rewards_log.write(str(rewards) + "\t")
@@ -174,8 +206,8 @@ def end_of_round(self, last_game_state: dict, last_action: str, events: List[str
 def reward_from_events(self, events: List[str]) -> int:
     reward_sum = 0
     for event in events:
-        if event == VISITED_SAME_PLACE:
-            print('reward for loop was handed out')
+        #if event == VISITED_SAME_PLACE:
+            #print('reward for loop was handed out')
         if event in game_rewards:
             reward_sum += game_rewards[event]
     self.logger.info(f"Awarded {reward_sum} for events {', '.join(events)}")
@@ -185,23 +217,28 @@ def reduce_epsilon(self, gamesPlayed: int, steps: int):
     
     oldEpsilon = self.epsilon
 
-    if gamesPlayed > 350:
-        self.epsilon = 0
+    if gamesPlayed > 25 and steps < 20:
+        self.epsilon = 0.1
+    if gamesPlayed > 25 and steps < 50:
+        self.epsilon = 0.5
+    if gamesPlayed > 25 and steps < 100:
+        self.epsilon = 0.4
+    if gamesPlayed > 50 and steps < 400:
+        self.epsilon = 0.1
+
     else:
-        if gamesPlayed > 50:
-            self.epsilon = 0.4
-        #if gamesPlayed > 50:
-        #    self.epsion = 0.1
-        if gamesPlayed > 100:
-            self.epsilon = 0.6    
-        if gamesPlayed > 150:
-            self.epsilon = 0.5
-        if gamesPlayed > 200:
-            self.epsilon = 0.3
-        if gamesPlayed > 250:
+        if gamesPlayed > 1000:
             self.epsilon = 0.1
-        if gamesPlayed > 350:
-            self.epsilon = 0
+        if gamesPlayed > 2000:
+            self.epsilon = 0.6    
+        if gamesPlayed > 3500:
+            self.epsilon = 0.5
+        if gamesPlayed > 5000:
+            self.epsilon = 0.3
+        if gamesPlayed > 7500:
+            self.epsilon = 0.1
+        if gamesPlayed > 1000:
+            self.epsilon = 0.1
 
     if oldEpsilon is not self.epsilon:
         print('epsilon reduced')

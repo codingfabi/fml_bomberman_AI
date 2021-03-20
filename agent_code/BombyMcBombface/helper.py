@@ -25,6 +25,9 @@ def state_to_features(game_state: dict) -> np.array:
     ownPosition = getOwnPosition(game_state)
     channels.append(ownPosition[0])
     channels.append(ownPosition[1])
+    channels.append(len(game_state['coins']))
+    channels.append(len(game_state['bombs']))
+    channels.append(countCrates(game_state['field']))
     # add surrounding fields to channels
     field = game_state['field']
     for coin in game_state['coins']:
@@ -90,3 +93,6 @@ def getSurroundingFields(field, position):
     surrounding.append(field[myX+1, myY+1])
 
     return surrounding
+
+def countCrates(field):
+    return np.count_nonzero(field == 1)
