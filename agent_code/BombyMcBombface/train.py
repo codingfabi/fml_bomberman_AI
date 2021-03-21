@@ -83,7 +83,6 @@ def do_training_step(self, game_state: dict):
     #policy_function = create_policy_for_approximator(self, self.approximator, self.epsilon, ACTION_SPACE)
 
     #policy = policy_function(game_state)
-    print(self.epsilon)
     if(random.uniform(0, 1) < self.epsilon):
         policy = [0.2,0.2,0.2,0.2,0.1,0.1]
         action = np.random.choice(ACTIONS, p = policy)
@@ -225,6 +224,8 @@ def reduce_epsilon(self, gamesPlayed: int, steps: int):
         self.epsilon = 0.4
     if gamesPlayed > 50 and steps < 400:
         self.epsilon = 0.1
+    if gamesPlayed >300:
+        self.epsilon = 0.01
 
     else:
         if gamesPlayed > 1000:

@@ -29,7 +29,7 @@ class ValueFunctionApproximator():
         """
         predicts an action according to the current value function
         """
-        features = normalize([state_to_features(game_state)])
+        features = [state_to_features(game_state)]
 
         if action == None:
             predictions = []
@@ -44,6 +44,6 @@ class ValueFunctionApproximator():
         """
         update parameters of given state and action
         """
-        features = normalize([state_to_features(game_state)])
+        features = [state_to_features(game_state)]
         self.models[action].fit(features, [target])
 

@@ -1,6 +1,8 @@
 import numpy as np
 from typing import List
 
+import settings as s
+
 def state_to_features(game_state: dict) -> np.array:
     """
     *This is not a required function, but an idea to structure your code.*
@@ -20,7 +22,7 @@ def state_to_features(game_state: dict) -> np.array:
         return None
 
     channels = []
-
+    """ 
     # store features in variable
     ownPosition = getOwnPosition(game_state)
     channels.append(ownPosition[0])
@@ -37,15 +39,24 @@ def state_to_features(game_state: dict) -> np.array:
         field[bomb_coordinates] = 3
     surrounding = getSurroundingFields(field, ownPosition)
     for point in surrounding:
-        channels.append(point)
-    """ if len(game_state['coins']) > 0:
-        firstCoin = game_state['coins'][0]
-    else:
-        firstCoin = (0,0) """
+        channels.append(point) """
 
-    """ for coin in game_state['coins']:
-        channels.append(coin) """
-
+    field = game_state['field']
+    coins = game_state['coins']
+    bombs = game_state['bombs']
+    ownPosition = getOwnPosition(game_state)
+    
+    channels.append(ownPosition[0])
+    channels.append(ownPosition[1])
+    for row in getCratesMap(field):
+        for point in row:
+            channels.append(point)
+    for row in getCoinsMap(field, coins):
+        for point in row:
+            channels.append(point)
+    for rows in getBombsMap(field, bombs):
+        for point in row:
+            channels.append(point)
 
     # For example, you could construct several channels of equal shape, ...
     #channels = []
@@ -96,3 +107,24 @@ def getSurroundingFields(field, position):
 
 def countCrates(field):
     return np.count_nonzero(field == 1)
+
+def getCratesMap(field):
+    newField = np.zeros((s.COLS, s.ROWS))
+    coordinates = np.where(field == 1)
+    for coordinate in coordinates:
+        newField[coordinate] = 1
+    return newField
+
+def getCoinsMap(field, coins):
+    coinField = np.zeros((s.COLS, s.ROWS))
+    coordinates = coins
+    for coordinate in coordinates:
+        coinField[coordinate] = 1
+    return coinField
+
+def getBombsMap(field, bombs):
+    bombField = np.zeros((s.COLS, s.ROWS))
+    coordinates = bombs
+    for coordinate in coordinates:
+        bombField[coordinate[0]] = 1
+    return bombField
