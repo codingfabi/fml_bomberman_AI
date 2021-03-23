@@ -88,5 +88,22 @@ def getSurroundingFields(field, position):
     surrounding.append(field[myX-1, myY+1])
     surrounding.append(field[myX, myY+1])
     surrounding.append(field[myX+1, myY+1])
+    surrounding.append(field[myX-2, myY-2])
+    surrounding.append(field[myX-1, myY-2])
+    surrounding.append(field[myX, myY-2])
+    surrounding.append(field[myX+1, myY-2])
+    surrounding.append(field[myX+2, myY-2])
+    surrounding.append(field[myX-2, myY-1])
+    surrounding.append(field[myX+2, myY-1])
+    surrounding.append(field[myX-2, myY])
+    surrounding.append(field[myX+2, myY])
+    surrounding.append(field[myX-2, myY+1])
+    surrounding.append(field[myX+2, myY+1])
+    surrounding.append(field[myX-2, myY+2])
+    surrounding.append(field[myX-1, myY+2])
+    surrounding.append(field[myX, myY+2])
+    surrounding.append(field[myX+1, myY+2])
+    surrounding.append(field[myX+2, myY+2])
+
 
     return surrounding

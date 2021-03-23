@@ -76,8 +76,6 @@ def do_training_step(self, game_state: dict):
         actionIndex = self.model.predict_action(game_state)
         action = self.model.actions[actionIndex]
 
-    print(self.epsilon)
-
     #self.logger.debug(f'Action taken:', action)
 
     reduce_epsilon(self, getGameNumberFromState(game_state),getStepsFromState(game_state))
@@ -163,14 +161,14 @@ def reward_from_events(self, events: List[str]) -> int:
 
 def reduce_epsilon(self, gamesPlayed: int, steps: int):
     
-    if gamesPlayed > 300 and steps < 10:
+    if gamesPlayed < 1000 and  gamesPlayed > 300 and steps < 10:
         self.epsilon = 0.02
     else:
-        if gamesPlayed > 50:
+        if gamesPlayed > 200:
             self.epsilon = 0.8
-        if gamesPlayed > 50:
+        if gamesPlayed > 200:
             self.epsion = 0.7
-        if gamesPlayed > 100:
+        if gamesPlayed > 200:
             self.epsilon = 0.6    
         if gamesPlayed > 250:
             self.epsilon = 0.5
